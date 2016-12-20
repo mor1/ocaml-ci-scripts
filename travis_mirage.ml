@@ -58,9 +58,7 @@ export "OPAMYES" "1";
 ?| "eval $(opam config env)";
 
 List.iter add_remote extra_remotes;
-
 List.iter pin pins;
-?| "eval $(opam config env)";
 
 ?| "opam update -u";
 ?| "opam install mirage";
