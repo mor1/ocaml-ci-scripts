@@ -11,13 +11,17 @@ distro=${DISTRO:-$default_distro}
 ocaml_version=${OCAML_VERSION:-$default_ocaml_version}
 
 cat >env.list <<-EOF
+    fork_user="$fork_user"
+    fork_branch="$fork_branch"
+    distro="$distro"
+    ocaml_version="$ocaml_version"
+
     MIRAGE_BACKEND="$MIRAGE_BACKEND"
     DEPLOY="$DEPLOY"
     UPDATE_GCC_BINUTILS="$UPDATE_GCC_BINUTILS"
     XENIMG="$XENIMG"
     FLAGS="$FLAGS"
 EOF
-echo "* env.list:"
 cat env.list
 
 cat >Dockerfile <<-EOF
@@ -30,7 +34,6 @@ cat >Dockerfile <<-EOF
     VOLUME /repo
     WORKDIR /repo
 EOF
-echo "* Dockerfile:"
 cat Dockerfile
 
 docker build -t local-build .
@@ -38,8 +41,4 @@ docker build -t local-build .
 OS=~/build/$TRAVIS_REPO_SLUG
 chmod -R a+w $OS
 
-CMD=docker run --env-file=env.list -v ${OS}:/repo local-build travis-mirage
-echo "* Command:"
-echo $CMD
-
-$CMD
+docker run --env-file=env.list -v ${OS}:/repo local-build travis-mirage
