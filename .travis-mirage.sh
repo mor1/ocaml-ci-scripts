@@ -21,11 +21,11 @@ echo "* env.list:"
 cat env.list
 
 cat >Dockerfile <<-EOF
-    FROM ocaml/opam:${DISTRO}_ocaml-${OCAML_VERSION}
+    FROM ocaml/opam:${distro}_ocaml-${ocaml_version}
     WORKDIR /home/opam/opam-repository
     RUN git pull origin master
     RUN opam pin add travis-opam \
-             https://github.com/$fork_user/ocaml-ci-scripts.git#$fork_branch
+             https://github.com/${fork_user}/ocaml-ci-scripts.git#${fork_branch}
     RUN opam update -uy && opam install mirage
     VOLUME /repo
     WORKDIR /repo
