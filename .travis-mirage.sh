@@ -1,35 +1,45 @@
-# If a fork of these scripts is specified, use that GitHub user instead
-fork_user=${FORK_USER:-ocaml}
+#!/bin/sh -e
 
-# If a branch of these scripts is specified, use that branch instead of 'master'
-fork_branch=${FORK_BRANCH:-master}
+default_user=ocaml
+default_branch=master
+default_distro=alpine
+default_ocaml_version=4.03.0
 
-### Bootstrap
+fork_user=${FORK_USER:-$default_user}
+fork_branch=${FORK_BRANCH:-$default_branch}
+distro=${DISTRO:-$default_distro}
+ocaml_version=${OCAML_VERSION:-$default_ocaml_version}
 
-set -uex
+cat >env.list <<-EOF
+    MIRAGE_BACKEND="$MIRAGE_BACKEND"
+    DEPLOY="$DEPLOY"
+    UPDATE_GCC_BINUTILS="$UPDATE_GCC_BINUTILS"
+    XENIMG="$XENIMG"
+    FLAGS="$FLAGS"
+EOF
+echo "* env.list:"
+cat env.list
 
-get() {
-  wget https://raw.githubusercontent.com/${fork_user}/ocaml-ci-scripts/${fork_branch}/$@
-}
+cat >Dockerfile <<-EOF
+    FROM ocaml/opam:${DISTRO}_ocaml-${OCAML_VERSION}
+    WORKDIR /home/opam/opam-repository
+    RUN git pull origin master
+    RUN opam pin add travis-opam \
+             https://github.com/$fork_user/ocaml-ci-scripts.git#$fork_branch
+    RUN opam update -uy && opam install mirage
+    VOLUME /repo
+    WORKDIR /repo
+EOF
+echo "* Dockerfile:"
+cat Dockerfile
 
-TMP_BUILD=$(mktemp -d)
-cd ${TMP_BUILD}
+docker build -t local-build .
 
-get .travis-ocaml.sh
-sh .travis-ocaml.sh
-export OPAMYES=1
-eval $(opam config env)
+OS=~/build/$TRAVIS_REPO_SLUG
+chmod -R a+w $OS
 
-# This could be removed with some OPAM variable plumbing into build commands
-opam install ocamlfind
+CMD=docker run --env-file=env.list -v ${OS}:/repo local-build travis-mirage
+echo "* Command:"
+echo $CMD
 
-get yorick.mli
-get yorick.ml
-ocamlc.opt yorick.mli
-ocamlfind ocamlc -c yorick.ml
-
-get travis_mirage.ml
-ocamlfind ocamlc -o travis-mirage -package unix -linkpkg yorick.cmo travis_mirage.ml
-cd -
-
-${TMP_BUILD}/travis-mirage
+$CMD
