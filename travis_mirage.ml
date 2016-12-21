@@ -43,10 +43,11 @@ let mirage_config_dir = getenv_default "MIRAGE_CONFIG_DIR" "src"
 
 (* Go go go *)
 
-set "-ue";
+set "-uex";
 export "OPAMYES" "1";
 ?| "eval $(opam config env)";
 
+(*
 begin (* remotes *)
   let remotes =
     ?|> "opam remote list --short | grep -v default | tr \"\\n\" \" \""
@@ -57,10 +58,14 @@ begin (* remotes *)
   let add_remote =
     let layer = ref 0 in
     fun remote ->
-        ?|~ "opam remote add extra%d %s" !layer remote; incr layer
+      if remote <> "" then begin
+        ?|~ "opam remote add extra%d %s" !layer remote;
+        incr layer
+      end
   in
-  List.(iter add_remote (filter (fun r -> r <> "") extra_remotes))
+  List.iter add_remote extra_remotes
 end;
+*)
 
 begin (* pins *)
   List.iter (fun pin -> match pair pin with
