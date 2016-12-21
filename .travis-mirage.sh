@@ -2,7 +2,7 @@
 
 default_user=ocaml
 default_branch=master
-default_distro=alpine
+default_distro=ubuntu-16.04
 default_ocaml_version=4.03.0
 
 fork_user=${FORK_USER:-$default_user}
