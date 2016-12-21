@@ -39,17 +39,15 @@ cat env.list
 cat >Dockerfile <<-EOF
 	FROM ocaml/opam:${distro}_ocaml-${ocaml_version}
 
-	WORKDIR /home/opam/opam-repository
-	RUN git pull origin master
-	RUN opam pin add travis-opam \
-	         https://github.com/${fork_user}/ocaml-ci-scripts.git#${fork_branch}
 	RUN opam update -uy
+	RUN opam pin add -n travis-opam \
+	         https://github.com/${fork_user}/ocaml-ci-scripts.git#${fork_branch}
 
 	USER root
-	RUN opam depext -u mirage
+	RUN opam depext -u travis-opam mirage
 
 	USER opam
-	RUN opam install mirage
+	RUN opam install travis-opam mirage
 
 	VOLUME /repo
 	WORKDIR /repo
