@@ -21,29 +21,36 @@ cat >env.list <<-EOF
 	DEPLOYD="$DEPLOYD"
 	EXTRA_REMOTES="$EXTRA_REMOTES"
 	FLAGS="$FLAGS"
+
 	MIRAGE_BACKEND="$MIRAGE_BACKEND"
+	MIRAGE_CONFIG_DIR="$MIRAGE_CONFIG_DIR"
 	MIRDIR="$MIRDIR"
+
 	TRAVIS_BRANCH="$TRAVIS_BRANCH"
 	TRAVIS_COMMIT="$TRAVIS_COMMIT"
-	MIRAGE_CONFIG_DIR="$MIRAGE_CONFIG_DIR"
 	TRAVIS_PULL_REQUEST="$TRAVIS_PULL_REQUEST"
 	TRAVIS_REPO_SLUG="$TRAVIS_REPO_SLUG"
+
 	XENIMG="$XENIMG"
 EOF
 cat env.list
 
 # construct Dockerfile for this particular unikernel
 cat >Dockerfile <<-EOF
-	#FROM ocaml/opam:${distro}_ocaml-${ocaml_version}
-	FROM mor1/mirage
+	FROM ocaml/opam:${distro}_ocaml-${ocaml_version}
 
 	WORKDIR /home/opam/opam-repository
 	RUN git pull origin master
-
 	RUN opam pin add travis-opam \
 	         https://github.com/${fork_user}/ocaml-ci-scripts.git#${fork_branch}
+	RUN opam update -uy
 
-	RUN opam update -uy && opam install mirage
+	USER root
+	RUN opam depext -u mirage
+
+	USER opam
+	RUN opam install mirage
+
 	VOLUME /repo
 	WORKDIR /repo
 EOF

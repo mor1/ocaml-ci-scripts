@@ -57,10 +57,9 @@ begin (* remotes *)
   let add_remote =
     let layer = ref 0 in
     fun remote ->
-      if remote <> "" then
         ?|~ "opam remote add extra%d %s" !layer remote; incr layer
   in
-  List.iter add_remote extra_remotes
+  List.(iter add_remote (filter (fun r -> r <> "") extra_remotes))
 end;
 
 begin (* pins *)
