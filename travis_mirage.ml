@@ -48,16 +48,18 @@ export "OPAMYES" "1";
 ?| "eval $(opam config env)";
 
 begin (* remotes *)
-  let add_remote =
-    let layer = ref 0 in
-    fun remote -> ?|~ "opam remote add extra%d %s" !layer remote; incr layer
-  in
   let remotes =
     ?|> "opam remote list --short | grep -v default | tr \"\\n\" \" \""
   in
   if remotes <> "" then begin
     ?|. "opam remote remove %s" remotes
   end;
+  let add_remote =
+    let layer = ref 0 in
+    fun remote ->
+      if remote <> "" then
+        ?|~ "opam remote add extra%d %s" !layer remote; incr layer
+  in
   List.iter add_remote extra_remotes
 end;
 
