@@ -40,6 +40,7 @@ cat >Dockerfile <<-EOF
 	FROM ocaml/opam:${distro}_ocaml-${ocaml_version}
 
 	RUN opam update -uy \
+	    && opam remove travis-opam \
 	    && opam pin add -n travis-opam \
 	         https://github.com/${fork_user}/ocaml-ci-scripts.git#$fork_branch \
 	    && opam depext -ui travis-opam mirage
