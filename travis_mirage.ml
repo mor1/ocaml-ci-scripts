@@ -47,7 +47,6 @@ set "-uex";
 export "OPAMYES" "1";
 ?| "eval $(opam config env)";
 
-(*
 begin (* remotes *)
   let remotes =
     ?|> "opam remote list --short | grep -v default | tr \"\\n\" \" \""
@@ -65,7 +64,6 @@ begin (* remotes *)
   in
   List.iter add_remote extra_remotes
 end;
-*)
 
 begin (* pins *)
   List.iter (fun pin -> match pair pin with
